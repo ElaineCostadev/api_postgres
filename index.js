@@ -3,7 +3,7 @@ const massive = require('massive');
 const monitor = require('pg-monitor');
 const axios = require('axios');
 
-
+// Pegando os dados da API
 const axiosData = async () => {
   const result = await axios('https://datausa.io/api/data?drilldowns=Nation&measures=Population');
   return result.data.data;
@@ -76,25 +76,44 @@ const axiosData = async () => {
     try {
         await migrationUp();
         // INCLUINDO DADOS DA API NO DB
-    //     const data = await axiosData();
-    //     const result3 = await db[DATABASE_SCHEMA].api_data.insert({
-    //             doc_record: JSON.stringify(data)
-    //         })
+        const data = await axiosData();
+        const result3 = await db[DATABASE_SCHEMA].api_data.insert({
+                doc_record: JSON.stringify(data)
+            })
+        console.log('result3 >>>', result3);
 
         // SOMANDO A POPULACAO COM SELECT
-        // const result4 = await db.query(
-        //     `SELECT SUM((total_population->> 'Population')::int)
-        //     FROM api_data,
-        //         jsonb_array_elements(doc_record->'data') AS total_population
-        //     WHERE (total_population->>'Year')::int IN (2020, 2019, 2018);`
-        // );
-        // console.log('result2 >>>', result2);
+        const result4 = await db.query(
+            `SELECT SUM((total_population->> 'Population')::int)
+            FROM api_data,
+                jsonb_array_elements(doc_record->'data') AS total_population
+            WHERE (total_population->>'Year')::int IN (2020, 2019, 2018);`
+        );
+        console.log('result4 >>>', result4);
         // [ { sum: '4870850665' } ]
-        // console.log(result4[0].sum);
+        console.log(result4[0].sum);
 
-        
-        
+        // CRIANDO UMA VIEW PARA POPULACAO COM SELECT
+        const result5 = await db.query(
+            `CREATE OR REPLACE VIEW population AS
+                SELECT SUM((total_population->> 'Population')::int)
+                FROM api_data,
+                    jsonb_array_elements(doc_record->'data') AS total_population
+                WHERE (total_population->>'Year')::int IN (2020, 2019, 2018);
+            SELECT * FROM population;`
+        );
+            console.log('result5 >>>', result5);
 
+        // SOMATORIA COM JS
+        const YEARS = [2020, 2019, 2018];
+        
+        let sum = 0;
+        const result6 = data.forEach(eachData => {
+            if (YEARS.includes(Number(eachData.Year))) {
+                return sum += eachData.Population
+                };
+        });
+            console.log('result6 >>>', sum);
 
         //exemplo de insert
         // const result1 = await db[DATABASE_SCHEMA].api_data.insert({
@@ -106,8 +125,6 @@ const axiosData = async () => {
         // const result2 = await db[DATABASE_SCHEMA].api_data.findOne(28,{
         //     fields: ['doc_record']
         // });
-
-
 
     } catch (e) {
         console.log(e.message)
