@@ -1,5 +1,8 @@
-Criar um aplicativo console em nodejs que implemente os seguintes requisitos.
+Aplicação que consegue a API e grava os resultados na tabela api_data na coluna doc_record
 
+<!--
+
+Criar um aplicativo console em nodejs que implemente os seguintes requisitos.
 1. Consumir a API (https://datausa.io/api/data?drilldowns=Nation&measures=Population) e gravar o resultado na tabela "api_data" no na coluna "doc_record".
 Saida da API:
 {"data":[{"ID Nation":"01000US","Nation":"United States","ID Year":2020,"Year":"2020","Population":326569308,"Slug Nation":"united-states"},...
@@ -22,3 +25,4 @@ https://axios-http.com/
 Ferramentas:
 https://tableplus.com/
 Postgres: por utilizar o PG fornecido pela nuvem HEROKU a string de conexao está no arquivo .env
+-->
